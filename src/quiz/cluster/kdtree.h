@@ -62,12 +62,12 @@ struct KdTree
 				if (distance <= distanceTol)
 					ids.push_back(node->id);
 
-				if ( (target[depth%2]-distanceTol) < node->point[depth%2])
-					searchHelper(target, node->left, depth+1, distanceTol, ids);
-				if ( (target[depth%2]-distanceTol) > node->point[depth%2])
-					searchHelper(target, node->right, depth+1, distanceTol, ids);
-
 			}
+
+			if ( (target[depth%2]-distanceTol) < (node->point[depth%2]))
+				searchHelper(target, node->left, depth+1, distanceTol, ids);
+			if ( (target[depth%2]+distanceTol) > (node->point[depth%2]))
+				searchHelper(target, node->right, depth+1, distanceTol, ids);
 		}
 	}
 
