@@ -78,6 +78,53 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
     }
 }
 
+void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer)
+{
+    // ----------------------------------------------------
+    // -----Open 3D viewer and display City Block     -----
+    // ----------------------------------------------------
+
+    ProcessPointClouds<pcl::PointXYZI>* pointProcessorI = new ProcessPointClouds<pcl::PointXYZI>();
+    pcl::PointCloud<pcl::PointXYZI>::Ptr inputCloud = pointProcessorI->loadPcd("./src/sensors/data/pcd/data_1/0000000000.pcd");
+
+    pcl::PointCloud<pcl::PointXYZI>::Ptr filterCloud =
+        pointProcessorI->FilterCloud(inputCloud, 0.2,
+                                    Eigen::Vector4f(-50, -6.0, -3, 1),
+                                    Eigen::Vector4f(60, 6.5, 4, 1));
+
+    std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> segmentCloud = 
+        pointProcessorI->SegmentPlane(filterCloud, 100, 0.2);
+    
+    // renderPointCloud(viewer, filter_cloud, "filterCloud");    
+    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudClusters = pointProcessorI->Clustering(segmentCloud.first, 0.35, 15, 600);
+  
+    int clusterId = 0;
+    std::vector<Color> colors = {Color(1,0,0), Color(0,1,0), Color(0,0,1), Color(0,0,1)};
+
+    renderPointCloud(viewer, segmentCloud.second, "planeCloud", Color(0,1,0));
+    renderPointCloud(viewer,segmentCloud.first,"obstCloud", Color(1,0,0));
+    // renderPointCloud(viewer,filterCloud,"filterCloud", Color(0,0,1));
+    // renderPointCloud(viewer,inputCloud,"inputCloud", Color(1,0,0));
+
+    for (pcl::PointCloud<pcl::PointXYZI>::Ptr cluster : cloudClusters) 
+    {
+        constexpr int kMinSize = 15;
+        constexpr float kBBoxMinHeight = 0.75;
+
+        renderPointCloud(viewer, cluster, "obstCloud" + std::to_string(clusterId),
+                            colors[clusterId % colors.size()]);
+
+        // Use rotated bounding box instead if you like
+        //BoxQ box = pointProcessorI->RotatedBoundingBox(cluster);
+
+        // Use standard bounding box
+        Box box = pointProcessorI->BoundingBox(cluster);
+        if (box.z_max - box.z_min >= kBBoxMinHeight || cluster->points.size() >= kMinSize * 2) {
+            renderBox(viewer, box, clusterId);
+        }
+        ++clusterId;
+    }
+}
 
 //setAngle: SWITCH CAMERA ANGLE {XY, TopDown, Side, FPS}
 void initCamera(CameraAngle setAngle, pcl::visualization::PCLVisualizer::Ptr& viewer)
@@ -110,7 +157,8 @@ int main (int argc, char** argv)
     pcl::visualization::PCLVisualizer::Ptr viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
     CameraAngle setAngle = XY;
     initCamera(setAngle, viewer);
-    simpleHighway(viewer);
+    // simpleHighway(viewer);
+    cityBlock(viewer);
 
     while (!viewer->wasStopped ())
     {
