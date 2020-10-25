@@ -233,6 +233,25 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::C
     // ec.setInputCloud (cloud);
     // ec.extract (clusterIndices);
 
+    // int j = 0;
+    // for (pcl::PointIndices getIndices: clusterIndices)
+    // {
+    //     typename pcl::PointCloud<PointT>::Ptr cloudCluster (new pcl::PointCloud<PointT>);
+    //     for (int index : getIndices.indices)
+    //         cloudCluster->points.push_back (cloud->points[index]);
+    //     cloudCluster->width = cloudCluster->size ();
+    //     cloudCluster->height = 1;
+    //     cloudCluster->is_dense = true;
+
+    //     clusters.push_back(cloudCluster);
+
+    //     // std::cout << "PointCloud representing the Cluster: " << cloudCluster->size () << " data points." << std::endl;
+    //     // std::stringstream ss;
+    //     // ss << "cloud_cluster_" << j << ".pcd";
+    //     // writer.write<PointT> (ss.str (), *cloudCluster, false); //*
+    //     j++;
+    // }
+
     KdTree* tree = new KdTree;
   
     std::vector<std::vector<float>> points;
